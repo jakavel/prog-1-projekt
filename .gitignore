@@ -1,0 +1,15 @@
+__pycache__
+
+data/entries/*
+!data/entries/entry_698620155.html
+!data/entries/entry_698980612.html
+!data/entries/entry_698650453.html
+!data/entries/entry_700809172.html
+!data/entries/entry_1080204394.html
+
+data/lists/*
+!data/lists/page_1.html
+!data/lists/page_2.html
+!data/lists/page_42.html
+!data/lists/page_50.html
+!data/lists/page_100.html

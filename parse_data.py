@@ -1,6 +1,7 @@
 import dataclasses
 import re
 import pathlib
+import csv
 
 
 def mods_from_page(page: str):
@@ -82,11 +83,11 @@ def get_stats_from_entry(entry: str) -> tuple[int, int, int]:
 
 
 RATING_IMAGE = {
-    '1-star_large.png?v=2': 1.0, 
-    '2-star_large.png?v=2': 2.0, 
-    '3-star_large.png?v=2': 3.0, 
+    '1-star_large.png?v=2': 1.0,
+    '2-star_large.png?v=2': 2.0,
+    '3-star_large.png?v=2': 3.0,
     '4-star_large.png?v=2': 4.0,
-    '5-star_large.png?v=2': 5.0, 
+    '5-star_large.png?v=2': 5.0,
     'not-yet_large.png?v=2': float("nan"),
 }
 RATING = re.compile(\
@@ -138,6 +139,55 @@ def get_tags_from_entry(entry: str) -> list[str]:
     return tags_list
 
 
+ID_INPUT = re.compile(r"""<input type="hidden" name="id" value="(?P<id>\d+)" \/>""")
+def get_id_from_entry(entry: str) -> int:
+    global ID_INPUT
+    # sta dve skriti input polji z id-jem, ne sesuj se, če najdeš oba
+    return ID_INPUT.search(entry).group("id")
+    return 1
+
+
+def write_main_csv(*columns):
+    locaton = pathlib.Path().parent / "data" / "parsed" / "mods.csv"
+    for col in columns:
+        # vsi seznami atributov so enake dolžine
+        assert len(col) == len(columns[0])
+    # seznamov je toliko, kot je imen
+    names = ["id", "title", "views", "downloads", "likes", "rating", "number_of_ratings", "size"]
+    assert len(names) == len(columns)
+    with open(locaton, "w", newline='', encoding="utf-8") as csv_file:
+        mod_writer = csv.writer(csv_file)
+        mod_writer.writerow(names)
+        for new_row in zip(*columns):
+            mod_writer.writerow(new_row)
+
+
+def write_new_table(things: list[list[str]], name_singular: str, name_plural: str) -> dict:
+    id_dict = dict()
+    locaton = pathlib.Path().parent / "data" / "parsed" / f"{name_plural}.csv"
+    unique_things = set()
+    for things_of_mod in things:
+        for thing in things_of_mod:
+            unique_things.add(thing)
+    with open(locaton, "w", newline='', encoding="utf-8") as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow([f"{name_singular}_id", f"{name_singular}_name"])
+        for i, thing in enumerate(sorted(unique_things)):
+            writer.writerow([i, thing])
+            id_dict[thing] = i
+    return id_dict
+
+
+def write_thing_mod_table(ids: list[int], things: list[list[str]], id_dict: dict, name_singular: str) -> None:
+    locaton = pathlib.Path().parent / "data" / "parsed" / f"{name_singular}_mod.csv"
+    with open(locaton, "w", newline='', encoding="utf-8") as csv_file:
+        thing_mod_writer = csv.writer(csv_file)
+        thing_mod_writer.writerow(["mod_id", f"{name_singular}_id"])
+        for mod_id, things_of_mod in zip(ids, things):
+            for one_thing in things_of_mod:
+                thing_mod_writer.writerow([mod_id, id_dict[one_thing]])
+
+
 if __name__ == "__main__":
     mods = get_mods_from_pages()
     print(f"Found {len(mods)} mods, parsing...")
@@ -146,28 +196,52 @@ if __name__ == "__main__":
     problems = []
 
     titles = []
-    stats = []
+    views = []
+    downloads = []
+    likes = []
     ratings = []
     num_ratings = []
     authors = []
     sizes = []
     tags = []
+    ids = []
 
     prev_len = len(tags)
 
     for i, (file, entry) in enumerate(get_entry_htmls()):
         try:
             titles.append(get_title_from_entry(entry))
-            stats.append(get_stats_from_entry(entry))
+            view, download, like = get_stats_from_entry(entry)
+            views.append(view)
+            downloads.append(download)
+            likes.append(like)
             r, n = get_score_from_entry(entry)
             ratings.append(r)
             num_ratings.append(n)
             authors.append(get_authors_from_entry(entry))
             sizes.append(get_size_from_entry(entry))
             tags.append(get_tags_from_entry(entry))
+            ids.append(get_id_from_entry(entry))
         except AssertionError:
             if file not in problems:
                 problems.append(file)
+
+    write_main_csv(
+        ids,
+        titles,
+        views,
+        downloads,
+        likes,
+        ratings,
+        num_ratings,
+        sizes,
+    )
+
+    tag_dict = write_new_table(tags, "tag", "tags")
+    write_thing_mod_table(ids, tags, tag_dict, "tag")
+
+    author_dict = write_new_table(authors, "author", "authors")
+    write_thing_mod_table(ids, authors, author_dict, "author")
 
     # 21 od datotek je samo stran, kjer piše da je te strani ni bilo mogoče naložiti
     # ( tudi, če jih poberem še enkrat, najbrš kakšna napaka na Steamovi strani )

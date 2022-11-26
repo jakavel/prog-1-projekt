@@ -15,3 +15,15 @@ Večina mod-ov je zbranih na [platformi *Steam*](https://steamcommunity.com/app/
  - Zaradi oblike strani ki ponuja mod-e ( najprej pokaže novejše popularne mod-e, manjbolj popularni so en klik stran ) bo razdelitev obiskovalcih enakomerna.
  - Zelo lahko je naložiti *prazen* mod, tak ki nima nobenih datotek in nič ne spremeni. 5% - 10% procentov modov bo praznih.
  - Med velikostjo mod-a in številom uporabnikov ne bo razmerja, saj veliko najbolj popularnih mod-ov samo poboljša kvaliteto življenja in spremeni zelo malo.
+
+ # Poganjanje kode
+
+ ## Dependency-ji
+ Ta projekt uporablja knjižnice, ki so napisane v `requirements.txt`, lahko jih naložite globalno ali pa uporabljate virtualno okolje.
+
+ Z virtualnim okoljem _venv_ bi to lahko naredili tako ( spodaj so bash ukazi, na Windowsih druga vrstica ne bo delovala ):
+ ```bash
+ python -m venv venv
+ source venv/bin/activate
+ pip install -r requirements.txt
+ ```

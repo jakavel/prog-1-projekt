@@ -13,3 +13,4 @@ data/lists/*
 !data/lists/page_42.html
 !data/lists/page_50.html
 !data/lists/page_100.html
+venv

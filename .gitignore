@@ -13,4 +13,18 @@ data/lists/*
 !data/lists/page_42.html
 !data/lists/page_50.html
 !data/lists/page_100.html
+
 venv
+
+# gitignore template for Jupyter Notebooks
+# website: http://jupyter.org/
+
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# IPython
+profile_default/
+ipython_config.py
+
+# Remove previous ipynb_checkpoints
+#   git rm -r .ipynb_checkpoints/
